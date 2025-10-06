@@ -1,47 +1,29 @@
 [
   {
     "tipo": "receita",
-    "valor": 100000,
-    "categoria": "lazer",
-    "descricao": "hf",
+    "valor": 3000,
+    "categoria": "Depósito",
+    "descricao": "salario",
     "data": "2025-10-06",
     "formaPagamento": "dinheiro",
-    "recorrente": false
-  },
-  {
-    "tipo": "despesa",
-    "valor": 100,
-    "categoria": "lazer",
-    "descricao": "ewf",
-    "data": "2025-10-06",
-    "formaPagamento": "cartão",
-    "recorrente": false
-  },
-  {
-    "tipo": "despesa",
-    "valor": 100,
-    "categoria": "lazer",
-    "descricao": "eu",
-    "data": "2025-10-06",
-    "formaPagamento": "pix",
-    "recorrente": true
-  },
-  {
-    "tipo": "receita",
-    "valor": 100,
-    "categoria": "lazer",
-    "descricao": "gfd",
-    "data": "2025-10-06",
-    "formaPagamento": "cartão",
     "recorrente": true
   },
   {
     "tipo": "despesa",
-    "valor": 30,
+    "valor": 20,
     "categoria": "alimentação",
-    "descricao": "l",
+    "descricao": "comer fora",
     "data": "2025-10-06",
     "formaPagamento": "cartão",
+    "recorrente": false
+  },
+  {
+    "tipo": "despesa",
+    "valor": 300,
+    "categoria": "lazer",
+    "descricao": "sair",
+    "data": "2025-10-06",
+    "formaPagamento": "dinheiro",
     "recorrente": false
   }
 ]

@@ -1,10 +1,37 @@
 [
   {
-    "descricao": "Alugel 900",
+    "descricao": "Aluguel",
     "valor": 900,
     "categoria": "aluguel",
-    "pago": true,
-    "dataCriacao": "2025-10-06",
-    "dataPagamento": "2025-10-06"
+    "pago": false,
+    "dataCriacao": "2025-10-06"
+  },
+  {
+    "descricao": "Luz",
+    "valor": 200,
+    "categoria": "luz",
+    "pago": false,
+    "dataCriacao": "2025-10-06"
+  },
+  {
+    "descricao": "Água",
+    "valor": 60,
+    "categoria": "água",
+    "pago": false,
+    "dataCriacao": "2025-10-06"
+  },
+  {
+    "descricao": "Parcela Carro",
+    "valor": 1000,
+    "categoria": "transporte",
+    "pago": false,
+    "dataCriacao": "2025-10-06"
+  },
+  {
+    "descricao": "Gasolina",
+    "valor": 500,
+    "categoria": "transporte",
+    "pago": false,
+    "dataCriacao": "2025-10-06"
   }
 ]

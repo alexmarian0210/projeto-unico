@@ -1,12 +1,12 @@
 [
   {
-    "categoria": "transporte",
-    "valorLimite": 100,
+    "categoria": "alimentação",
+    "valorLimite": 200,
     "valorGasto": 0
   },
   {
-    "categoria": "alimentação",
-    "valorLimite": 20,
+    "categoria": "lazer",
+    "valorLimite": 200,
     "valorGasto": 0
   }
 ]
