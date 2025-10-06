@@ -32,7 +32,11 @@ async function salvarGastos() {
     }
 
     try {
-        const data = await input({ message: 'Data (YYYY-MM-DD):' });
+        const currentDate = new Date();
+        const year = currentDate.getFullYear();
+        const month = String(currentDate.getMonth() + 1).padStart(2, '0');
+        const day = String(currentDate.getDate()).padStart(2, '0');
+        const data = `${year}-${month}-${day}`;
         const tipo = await select({ message: 'Tipo:', choices: [{value: 'receita', name: 'Receita'}, {value: 'despesa', name: 'Despesa'}] });
         const valor = parseFloat(await input({ message: 'Valor:' }));
         const categoria = await select({ 
@@ -132,5 +136,6 @@ async function totaoContas() {
     const totalContas = await input({ message: 'Total de Contas:' });
     console.log(totalContas);
 }
+
 
 iniciar();
