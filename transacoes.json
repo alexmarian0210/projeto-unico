@@ -1,0 +1,20 @@
+[
+  {
+    "tipo": "receita",
+    "valor": 100000,
+    "categoria": "lazer",
+    "descricao": "hf",
+    "data": "2025-10-06",
+    "formaPagamento": "dinheiro",
+    "recorrente": false
+  },
+  {
+    "tipo": "despesa",
+    "valor": 100,
+    "categoria": "lazer",
+    "descricao": "ewf",
+    "data": "2025-10-06",
+    "formaPagamento": "cartão",
+    "recorrente": false
+  }
+]
