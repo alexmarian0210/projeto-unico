@@ -1,5 +1,5 @@
 // Importações
-const { input, select, checkbox, multiselect } = require('@inquirer/prompts');
+const { input, select } = require('@inquirer/prompts'); // Removido multiselect e checkbox para evitar erros
 const fs = require('fs').promises; // Usando promises para async/await
 
 // ===================== Funções de transações =====================
@@ -12,7 +12,8 @@ async function salvarGastos() {
             choices: [{value: 'receita', name: 'Receita'}, {value: 'despesa', name: 'Despesa'}]
         });
 
-        const valor = parseFloat(await input({ message: 'Valor:' }));
+        const valorInput = await input({ message: 'Valor:' });
+        const valor = parseFloat(valorInput);
         if (isNaN(valor) || valor <= 0) {
             console.log('Valor inválido. Tente novamente.');
             return;
@@ -49,7 +50,7 @@ async function salvarGastos() {
 
         const recorrente = await select({
             message: 'Recorrente?',
-            choices: [{value: true, name: 'Sim'}, {value: false, name: 'Não', checked: true}]
+            choices: [{value: true, name: 'Sim'}, {value: false, name: 'Não'}]
         });
 
         const transacao = { tipo, valor, categoria, descricao, data, formaPagamento, recorrente };
@@ -97,13 +98,42 @@ async function verTransacoes() {
     }
 }
 
-// ===================== Funções de gastos (básicas, pois não estavam definidas) =====================
+// ===================== Funções de gastos =====================
 async function definirGastos() {
-    console.log('Funcionalidade para definir metas/orçamentos mensais (em desenvolvimento).');
-    // Exemplo: Poderia adicionar um JSON para metas de categorias
-    const meta = await input({ message: 'Defina uma meta para uma categoria (ex: "alimentacao: 500"):' });
-    console.log(`Meta definida: ${meta}`);
-    // Aqui você poderia salvar em um arquivo 'metas.json'
+    try {
+        // Seleciona a categoria primeiro
+        const categoria = await select({ 
+            message: 'Qual categoria de gasto você quer definir a meta?', 
+            choices: [
+                {value: 'alimentacao', name: 'Alimentação'},
+                {value: 'lazer', name: 'Lazer'},
+                {value: 'transporte', name: 'Transporte'},
+                {value: 'saude', name: 'Saúde'},
+                {value: 'outros', name: 'Outros'}
+            ]
+        });
+
+        // Agora, só pede o valor!
+        const valorInput = await input({ message: `Digite o valor mensal da meta para ${categoria} (ex: 500):` });
+        const valor = parseFloat(valorInput);
+        if (isNaN(valor) || valor <= 0) {
+            console.log('Valor inválido. Tente novamente.');
+            return;
+        }
+
+        // Salva em metas.json
+        let metas = {};
+        try {
+            const conteudo = await fs.readFile('metas.json', 'utf8');
+            metas = JSON.parse(conteudo);
+        } catch {}
+
+        metas[categoria] = valor;
+        await fs.writeFile('metas.json', JSON.stringify(metas, null, 2));
+        console.log(`✅ Meta de R$ ${valor.toFixed(2)} para "${categoria}" definida com sucesso!`);
+    } catch (error) {
+        console.error('Erro ao definir meta:', error);
+    }
 }
 
 async function verGastos() {
@@ -166,7 +196,8 @@ async function inicializarGastosFixos() {
 async function adicionarGastoFixo() {
     try {
         const descricao = await input({ message: 'Descrição do gasto fixo:' });
-        const valor = parseFloat(await input({ message: 'Valor mensal:' }));
+        const valorInput = await input({ message: 'Valor mensal:' });
+        const valor = parseFloat(valorInput);
         if (isNaN(valor) || valor <= 0) {
             console.log('Valor inválido.');
             return;
@@ -182,7 +213,7 @@ async function adicionarGastoFixo() {
             ]
         });
 
-        let gastosFixos = await inicializarGastosFixos(); // Garante que o arquivo existe
+        let gastosFixos = await inicializarGastosFixos();
 
         gastosFixos.push({ 
             descricao, 
@@ -198,6 +229,7 @@ async function adicionarGastoFixo() {
     }
 }
 
+// VERSÃO CORRIGIDA: Sem multiselect, usa loop com select()
 async function marcarGastoComoPago() {
     try {
         let gastosFixos = await inicializarGastosFixos();
@@ -207,27 +239,40 @@ async function marcarGastoComoPago() {
             return;
         }
 
-        const selIndices = await multiselect({
-            message: 'Selecione os gastos a marcar como pagos:',
-            choices: pendentes.map((g, i) => ({ 
-                value: i, 
-                name: `${g.descricao} - R$ ${g.valor.toFixed(2)} (${g.categoria})` 
-            }))
+        console.log('\n📋 Gastos pendentes encontrados:');
+        pendentes.forEach((g, i) => {
+            console.log(`${i+1}. ${g.descricao} - R$ ${g.valor.toFixed(2)} (${g.categoria})`);
         });
 
-        for (const sel of selIndices) {
-            const gasto = pendentes[sel];
-            const idx = gastosFixos.findIndex(g => 
-                g.descricao === gasto.descricao && g.valor === gasto.valor && !g.pago
-            );
-            if (idx !== -1) {
-                gastosFixos[idx].pago = true;
-                gastosFixos[idx].dataPagamento = new Date().toISOString().split('T')[0];
-                console.log(`Gasto "${gastosFixos[idx].descricao}" marcado como pago!`);
+        // Loop simples: processa um a um com select()
+        for (let i = 0; i < pendentes.length; i++) {
+            const opcao = await select({
+                message: `\nMarcar "${pendentes[i].descricao}" como pago?`,
+                choices: [
+                    { value: 'sim', name: '✅ Sim' },
+                    { value: 'nao', name: '❌ Não' }
+                ]
+            });
+
+            if (opcao === 'sim') {
+                const gasto = pendentes[i];
+                const idx = gastosFixos.findIndex(g => 
+                    g.descricao === gasto.descricao && 
+                    g.valor === gasto.valor && 
+                    !g.pago
+                );
+                if (idx !== -1) {
+                    gastosFixos[idx].pago = true;
+                    gastosFixos[idx].dataPagamento = new Date().toISOString().split('T')[0];
+                    console.log(`✅ "${gastosFixos[idx].descricao}" marcado como pago!`);
+                }
+            } else {
+                console.log(`⏭️ Pulando "${pendentes[i].descricao}".`);
             }
         }
 
         await fs.writeFile('gastosFixos.json', JSON.stringify(gastosFixos, null, 2));
+        console.log('\n🎉 Processo de pagamento concluído!');
     } catch (error) {
         console.error("Erro ao marcar gasto como pago:", error);
     }
@@ -269,10 +314,10 @@ async function gerenciarGastosFixos() {
         case 'Marcar como Pago': await marcarGastoComoPago(); break;
         case 'Voltar': break;
     }
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa para melhor UX
+    await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa para UX
 }
 
-// ===================== Função de Resumo Financeiro =====================
+// ===================== Função de Resumo Financeiro (com comparação de metas) =====================
 async function gerarResumoFinanceiro() {
     try {
         let transacoes = [];
@@ -282,6 +327,14 @@ async function gerarResumoFinanceiro() {
         } catch {
             console.log('Nenhuma transação encontrada.');
             return;
+        }
+
+        let metas = {};
+        try {
+            const conteudoMetas = await fs.readFile('metas.json', 'utf8');
+            metas = JSON.parse(conteudoMetas);
+        } catch {
+            console.log('Nenhuma meta definida ainda. Use "Definir Gastos" para criar.');
         }
 
         const hoje = new Date();
@@ -295,7 +348,7 @@ async function gerarResumoFinanceiro() {
         const totalDespesas = despesas.reduce((acc, d) => acc + d.valor, 0);
         const saldo = totalReceitas - totalDespesas;
 
-        // Resumo por categoria (despesas)
+        // Resumo por categoria (despesas) com comparação de meta
         const gastosPorCategoria = {};
         despesas.forEach(d => {
             gastosPorCategoria[d.categoria] = (gastosPorCategoria[d.categoria] || 0) + d.valor;
@@ -307,9 +360,11 @@ async function gerarResumoFinanceiro() {
         console.log(`Saldo: R$ ${saldo.toFixed(2)}`);
 
         if (Object.keys(gastosPorCategoria).length > 0) {
-            console.log('\nGastos por Categoria:');
+            console.log('\nGastos por Categoria (vs. Meta):');
             Object.entries(gastosPorCategoria).forEach(([cat, val]) => {
-                console.log(`  - ${cat}: R$ ${val.toFixed(2)}`);
+                const metaValor = metas[cat] || 0;
+                const status = val > metaValor ? '🔴 Excedido' : val === metaValor ? '🟡 No Limite' : '🟢 OK';
+                console.log(`  - ${cat}: R$ ${val.toFixed(2)} / Meta: R$ ${metaValor.toFixed(2)} (${status})`);
             });
         }
         console.log('');

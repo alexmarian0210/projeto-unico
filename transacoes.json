@@ -25,5 +25,32 @@
     "data": "2025-10-06",
     "formaPagamento": "dinheiro",
     "recorrente": false
+  },
+  {
+    "tipo": "despesa",
+    "valor": 200,
+    "categoria": "alimentacao",
+    "descricao": "pizz",
+    "data": "2025-10-06",
+    "formaPagamento": "cartao",
+    "recorrente": false
+  },
+  {
+    "tipo": "despesa",
+    "valor": 23,
+    "categoria": "outros",
+    "descricao": "re",
+    "data": "2025-10-06",
+    "formaPagamento": "dinheiro",
+    "recorrente": true
+  },
+  {
+    "tipo": "despesa",
+    "valor": 200,
+    "categoria": "transporte",
+    "descricao": "senai",
+    "data": "2025-10-06",
+    "formaPagamento": "dinheiro",
+    "recorrente": true
   }
 ]
