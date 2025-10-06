@@ -16,5 +16,32 @@
     "data": "2025-10-06",
     "formaPagamento": "cartão",
     "recorrente": false
+  },
+  {
+    "tipo": "despesa",
+    "valor": 100,
+    "categoria": "lazer",
+    "descricao": "eu",
+    "data": "2025-10-06",
+    "formaPagamento": "pix",
+    "recorrente": true
+  },
+  {
+    "tipo": "receita",
+    "valor": 100,
+    "categoria": "lazer",
+    "descricao": "gfd",
+    "data": "2025-10-06",
+    "formaPagamento": "cartão",
+    "recorrente": true
+  },
+  {
+    "tipo": "despesa",
+    "valor": 30,
+    "categoria": "alimentação",
+    "descricao": "l",
+    "data": "2025-10-06",
+    "formaPagamento": "cartão",
+    "recorrente": false
   }
 ]

@@ -1,0 +1,12 @@
+[
+  {
+    "categoria": "transporte",
+    "valorLimite": 100,
+    "valorGasto": 0
+  },
+  {
+    "categoria": "alimentação",
+    "valorLimite": 20,
+    "valorGasto": 0
+  }
+]

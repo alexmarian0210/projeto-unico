@@ -1,0 +1,10 @@
+[
+  {
+    "descricao": "Alugel 900",
+    "valor": 900,
+    "categoria": "aluguel",
+    "pago": true,
+    "dataCriacao": "2025-10-06",
+    "dataPagamento": "2025-10-06"
+  }
+]
