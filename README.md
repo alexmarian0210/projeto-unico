@@ -31,13 +31,12 @@ Os dados são armazenados em arquivos JSON simples para persistência local:
 
 Esses arquivos são criados automaticamente e filtrados por mês nos relatórios.
 
-## Capturas de Tela
-[Incluir screenshots do app funcionando]
+
 
 ## Autor
 Alex Marian  
-GitHub: [github.com/alexmarian](https://github.com/alexmarian)  
-Email: alex.marian@example.com
+GitHub: [github.com/alexmarian](https://github.com/alexmarian0210/projeto-unico.git)  
+Email: alex_marian@estudante.sesisenai.org.br
 
 ## Aprendizados
-Desenvolvendo este projeto, aprendi sobre async/await com fs.promises para operações de I/O assíncronas, criação de interfaces CLI interativas com prompts, tratamento robusto de erros em loops async, validação de dados (como parseFloat para valores numéricos) e modularidade de código para facilitar expansões futuras, como integração com gráficos ou bancos de dados.
+Desenvolvendo este projeto, aprendi sobre async/await com fs.promises para operações de I/O assíncronas, criação de interfaces interativas com prompts, tratamento robusto de erros em loops async, validação de dados e modularidade de código para facilitar expansões futuras, como integração com gráficos ou bancos de dados.

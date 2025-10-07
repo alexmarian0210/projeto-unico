@@ -1,8 +1,18 @@
 // Importações
 const { input, select } = require('@inquirer/prompts'); // Removido multiselect e checkbox para evitar erros
 const fs = require('fs').promises; // Usando promises para async/await
+const chalk = require('chalk');
+const boxen = require('boxen');
 
 // ===================== Funções de transações =====================
+
+/**
+ * @description Salva uma nova transação (receita ou despesa) no arquivo `transacoes.json`.
+ *              Solicita ao usuário o tipo, valor, categoria, descrição, forma de pagamento e se a transação é recorrente.
+ *              Valida o valor inserido para garantir que seja um número positivo.
+ *              Lê as transações existentes, adiciona a nova e salva o arquivo atualizado.
+ * @returns {Promise<void>}
+ */
 async function salvarGastos() {
     try {
         const data = new Date().toISOString().split('T')[0];
@@ -15,7 +25,7 @@ async function salvarGastos() {
         const valorInput = await input({ message: 'Valor:' });
         const valor = parseFloat(valorInput);
         if (isNaN(valor) || valor <= 0) {
-            console.log('Valor inválido. Tente novamente.');
+            console.log(chalk.red('Valor inválido. Tente novamente.'));
             return;
         }
 
@@ -63,12 +73,18 @@ async function salvarGastos() {
 
         transacoes.push(transacao);
         await fs.writeFile('transacoes.json', JSON.stringify(transacoes, null, 2));
-        console.log('Transação adicionada com sucesso!');
+        console.log(chalk.green('Transação adicionada com sucesso!'));
     } catch (error) {
-        console.error('Erro ao salvar gastos:', error);
+        console.error(chalk.red('Erro ao salvar gastos:'), error);
     }
 }
 
+/**
+ * @description Exibe as transações (receitas e despesas) do mês atual.
+ *              Lê o arquivo `transacoes.json`, filtra as transações para o mês corrente e as exibe no console.
+ *              Se não houver transações, exibe uma mensagem informativa.
+ * @returns {Promise<void>}
+ */
 async function verTransacoes() {
     try {
         let transacoes = [];
@@ -76,29 +92,37 @@ async function verTransacoes() {
             const conteudo = await fs.readFile('transacoes.json', 'utf8');
             transacoes = JSON.parse(conteudo);
         } catch {
-            console.log('Nenhuma transação encontrada.');
+            console.log(chalk.yellow('Nenhuma transação encontrada.'));
             return;
         }
 
         if (!transacoes.length) {
-            console.log('Nenhuma transação registrada.');
+            console.log(chalk.yellow('Nenhuma transação registrada.'));
             return;
         }
 
         const mesAtual = new Date().toISOString().slice(0, 7);
         const transacoesDoMes = transacoes.filter(t => t.data.startsWith(mesAtual));
 
-        console.log(`\n📋 Transações do mês ${mesAtual}:`);
+        console.log(chalk.blue(`\n📋 Transações do mês ${mesAtual}:`));
         transacoesDoMes.forEach((t, i) => {
             const emoji = t.tipo === 'receita' ? '💰' : '💸';
-            console.log(`${i+1}. ${emoji} ${t.descricao} - R$ ${t.valor.toFixed(2)} (${t.categoria}) - ${t.data}`);
+            const cor = t.tipo === 'receita' ? chalk.green : chalk.red;
+            console.log(cor(`${i+1}. ${emoji} ${t.descricao} - R$ ${t.valor.toFixed(2)} (${t.categoria}) - ${t.data}`));
         });
     } catch (error) {
-        console.error('Erro ao ver transações:', error);
+        console.error(chalk.red('Erro ao ver transações:'), error);
     }
 }
 
 // ===================== Funções de gastos =====================
+
+/**
+ * @description Define uma meta de gasto mensal para uma categoria específica.
+ *              Solicita ao usuário a categoria e o valor da meta.
+ *              Salva a meta no arquivo `metas.json`.
+ * @returns {Promise<void>}
+ */
 async function definirGastos() {
     try {
         // Seleciona a categoria primeiro
@@ -117,7 +141,7 @@ async function definirGastos() {
         const valorInput = await input({ message: `Digite o valor mensal da meta para ${categoria} (ex: 500):` });
         const valor = parseFloat(valorInput);
         if (isNaN(valor) || valor <= 0) {
-            console.log('Valor inválido. Tente novamente.');
+            console.log(chalk.red('Valor inválido. Tente novamente.'));
             return;
         }
 
@@ -130,12 +154,18 @@ async function definirGastos() {
 
         metas[categoria] = valor;
         await fs.writeFile('metas.json', JSON.stringify(metas, null, 2));
-        console.log(`✅ Meta de R$ ${valor.toFixed(2)} para "${categoria}" definida com sucesso!`);
+        console.log(chalk.green(`✅ Meta de R$ ${valor.toFixed(2)} para "${categoria}" definida com sucesso!`));
     } catch (error) {
-        console.error('Erro ao definir meta:', error);
+        console.error(chalk.red('Erro ao definir meta:'), error);
     }
 }
 
+/**
+ * @description Exibe os gastos (despesas) do mês atual.
+ *              Lê o arquivo `transacoes.json`, filtra as despesas do mês corrente e as exibe no console.
+ *              Calcula e exibe o total de gastos do mês.
+ * @returns {Promise<void>}
+ */
 async function verGastos() {
     try {
         let transacoes = [];
@@ -143,7 +173,7 @@ async function verGastos() {
             const conteudo = await fs.readFile('transacoes.json', 'utf8');
             transacoes = JSON.parse(conteudo);
         } catch {
-            console.log('Nenhuma transação encontrada.');
+            console.log(chalk.yellow('Nenhuma transação encontrada.'));
             return;
         }
 
@@ -152,23 +182,29 @@ async function verGastos() {
         const despesas = transacoes.filter(t => t.tipo === 'despesa' && t.data.startsWith(mesAtual));
 
         if (!despesas.length) {
-            console.log('Nenhum gasto no mês atual.');
+            console.log(chalk.yellow('Nenhum gasto no mês atual.'));
             return;
         }
 
-        console.log(`\n💸 Gastos do mês ${mesAtual}:`);
+        console.log(chalk.blue(`\n💸 Gastos do mês ${mesAtual}:`));
         despesas.forEach((d, i) => {
-            console.log(`${i+1}. ${d.descricao} - R$ ${d.valor.toFixed(2)} (${d.categoria}) - ${d.data}`);
+            console.log(chalk.red(`${i+1}. ${d.descricao} - R$ ${d.valor.toFixed(2)} (${d.categoria}) - ${d.data}`));
         });
 
         const totalGastos = despesas.reduce((acc, d) => acc + d.valor, 0);
-        console.log(`\nTotal de gastos: R$ ${totalGastos.toFixed(2)}`);
+        console.log(chalk.bold(`\nTotal de gastos: R$ ${totalGastos.toFixed(2)}`));
     } catch (error) {
-        console.error('Erro ao ver gastos:', error);
+        console.error(chalk.red('Erro ao ver gastos:'), error);
     }
 }
 
 // ===================== Funções de gastos fixos =====================
+
+/**
+ * @description Inicializa o arquivo `gastosFixos.json` com valores padrão se ele não existir.
+ *              Se o arquivo já existir, apenas lê e retorna seu conteúdo.
+ * @returns {Promise<Array<Object>>} Um array com os gastos fixos.
+ */
 async function inicializarGastosFixos() {
     try {
         let gastosFixos = [];
@@ -184,22 +220,27 @@ async function inicializarGastosFixos() {
                 {descricao: "Gasolina", valor: 500, categoria: "transporte", pago: false, dataCriacao: new Date().toISOString().split('T')[0]}
             ];
             await fs.writeFile('gastosFixos.json', JSON.stringify(gastosFixos, null, 2));
-            console.log("Gastos fixos padrão inicializados.");
+            console.log(chalk.blue("Gastos fixos padrão inicializados."));
         }
         return gastosFixos;
     } catch (error) {
-        console.error('Erro ao inicializar gastos fixos:', error);
+        console.error(chalk.red('Erro ao inicializar gastos fixos:'), error);
         return [];
     }
 }
 
+/**
+ * @description Adiciona um novo gasto fixo ao arquivo `gastosFixos.json`.
+ *              Solicita ao usuário a descrição, valor e categoria do gasto fixo.
+ * @returns {Promise<void>}
+ */
 async function adicionarGastoFixo() {
     try {
         const descricao = await input({ message: 'Descrição do gasto fixo:' });
         const valorInput = await input({ message: 'Valor mensal:' });
         const valor = parseFloat(valorInput);
         if (isNaN(valor) || valor <= 0) {
-            console.log('Valor inválido.');
+            console.log(chalk.red('Valor inválido.'));
             return;
         }
         const categoria = await select({ 
@@ -223,25 +264,30 @@ async function adicionarGastoFixo() {
             dataCriacao: new Date().toISOString().split('T')[0] 
         });
         await fs.writeFile('gastosFixos.json', JSON.stringify(gastosFixos, null, 2));
-        console.log('Gasto fixo adicionado com sucesso!');
+        console.log(chalk.green('Gasto fixo adicionado com sucesso!'));
     } catch (error) {
-        console.error('Erro ao adicionar gasto fixo:', error);
+        console.error(chalk.red('Erro ao adicionar gasto fixo:'), error);
     }
 }
 
-// VERSÃO CORRIGIDA: Sem multiselect, usa loop com select()
+/**
+ * @description Permite ao usuário marcar um ou mais gastos fixos pendentes como pagos.
+ *              Exibe a lista de gastos pendentes e pergunta para cada um se deve ser marcado como pago.
+ *              Atualiza o status e a data de pagamento no arquivo `gastosFixos.json`.
+ * @returns {Promise<void>}
+ */
 async function marcarGastoComoPago() {
     try {
         let gastosFixos = await inicializarGastosFixos();
         const pendentes = gastosFixos.filter(g => !g.pago);
         if (!pendentes.length) {
-            console.log("Nenhum gasto pendente.");
+            console.log(chalk.yellow("Nenhum gasto pendente."));
             return;
         }
 
-        console.log('\n📋 Gastos pendentes encontrados:');
+        console.log(chalk.blue('\n📋 Gastos pendentes encontrados:'));
         pendentes.forEach((g, i) => {
-            console.log(`${i+1}. ${g.descricao} - R$ ${g.valor.toFixed(2)} (${g.categoria})`);
+            console.log(chalk.yellow(`${i+1}. ${g.descricao} - R$ ${g.valor.toFixed(2)} (${g.categoria})`));
         });
 
         // Loop simples: processa um a um com select()
@@ -264,39 +310,48 @@ async function marcarGastoComoPago() {
                 if (idx !== -1) {
                     gastosFixos[idx].pago = true;
                     gastosFixos[idx].dataPagamento = new Date().toISOString().split('T')[0];
-                    console.log(`✅ "${gastosFixos[idx].descricao}" marcado como pago!`);
+                    console.log(chalk.green(`✅ "${gastosFixos[idx].descricao}" marcado como pago!`));
                 }
             } else {
-                console.log(`⏭️ Pulando "${pendentes[i].descricao}".`);
+                console.log(chalk.gray(`⏭️ Pulando "${pendentes[i].descricao}".`));
             }
         }
 
         await fs.writeFile('gastosFixos.json', JSON.stringify(gastosFixos, null, 2));
-        console.log('\n🎉 Processo de pagamento concluído!');
+        console.log(chalk.green('\n🎉 Processo de pagamento concluído!'));
     } catch (error) {
-        console.error("Erro ao marcar gasto como pago:", error);
+        console.error(chalk.red("Erro ao marcar gasto como pago:"), error);
     }
 }
 
+/**
+ * @description Exibe todos os gastos fixos, mostrando seu status (pago ou pendente).
+ * @returns {Promise<void>}
+ */
 async function verGastosFixos() {
     try {
         let gastosFixos = await inicializarGastosFixos();
         if (!gastosFixos.length) {
-            console.log("Nenhum gasto fixo encontrado.");
+            console.log(chalk.yellow("Nenhum gasto fixo encontrado."));
             return;
         }
 
-        console.log('\n🔒 Gastos Fixos:');
+        console.log(chalk.blue('\n🔒 Gastos Fixos:'));
         gastosFixos.forEach((g, i) => {
-            const status = g.pago ? '✅ PAGO' : '❌ PENDENTE';
+            const status = g.pago ? chalk.green('✅ PAGO') : chalk.red('❌ PENDENTE');
             console.log(`${i+1}. ${g.descricao} - R$ ${g.valor.toFixed(2)} - ${status} - Categoria: ${g.categoria}`);
         });
     } catch (error) {
-        console.error("Erro ao ler gastos fixos:", error);
+        console.error(chalk.red("Erro ao ler gastos fixos:"), error);
     }
 }
 
 // ===================== Menu de Gastos Fixos =====================
+
+/**
+ * @description Exibe um submenu para gerenciar gastos fixos, permitindo adicionar, ver ou marcar como pago.
+ * @returns {Promise<void>}
+ */
 async function gerenciarGastosFixos() {
     const opcao = await select({
         message: 'Gerenciar Gastos Fixos:',
@@ -318,6 +373,13 @@ async function gerenciarGastosFixos() {
 }
 
 // ===================== Função de Resumo Financeiro (com comparação de metas) =====================
+
+/**
+ * @description Gera e exibe um resumo financeiro completo do mês atual.
+ *              Inclui total de receitas, despesas, saldo e uma comparação dos gastos por categoria com as metas definidas.
+ *              Indica visualmente se as metas foram excedidas.
+ * @returns {Promise<void>}
+ */
 async function gerarResumoFinanceiro() {
     try {
         let transacoes = [];
@@ -325,7 +387,7 @@ async function gerarResumoFinanceiro() {
             const conteudo = await fs.readFile('transacoes.json', 'utf8');
             transacoes = JSON.parse(conteudo);
         } catch {
-            console.log('Nenhuma transação encontrada.');
+            console.log(chalk.yellow('Nenhuma transação encontrada.'));
             return;
         }
 
@@ -334,7 +396,7 @@ async function gerarResumoFinanceiro() {
             const conteudoMetas = await fs.readFile('metas.json', 'utf8');
             metas = JSON.parse(conteudoMetas);
         } catch {
-            console.log('Nenhuma meta definida ainda. Use "Definir Gastos" para criar.');
+            console.log(chalk.yellow('Nenhuma meta definida ainda. Use "Definir Gastos" para criar.'));
         }
 
         const hoje = new Date();
@@ -354,26 +416,39 @@ async function gerarResumoFinanceiro() {
             gastosPorCategoria[d.categoria] = (gastosPorCategoria[d.categoria] || 0) + d.valor;
         });
 
-        console.log(`\n📅 Resumo Financeiro de ${mesAtual}`);
-        console.log(`Receitas: R$ ${totalReceitas.toFixed(2)}`);
-        console.log(`Despesas: R$ ${totalDespesas.toFixed(2)}`);
-        console.log(`Saldo: R$ ${saldo.toFixed(2)}`);
+        console.log(chalk.blue.bold(`\n📅 Resumo Financeiro de ${mesAtual}`));
+        console.log(chalk.green(`Receitas: R$ ${totalReceitas.toFixed(2)}`));
+        console.log(chalk.red(`Despesas: R$ ${totalDespesas.toFixed(2)}`));
+        console.log(chalk.bold(`Saldo: R$ ${saldo.toFixed(2)}`));
 
         if (Object.keys(gastosPorCategoria).length > 0) {
-            console.log('\nGastos por Categoria (vs. Meta):');
+            console.log(chalk.blue('\nGastos por Categoria (vs. Meta):'));
             Object.entries(gastosPorCategoria).forEach(([cat, val]) => {
                 const metaValor = metas[cat] || 0;
-                const status = val > metaValor ? '🔴 Excedido' : val === metaValor ? '🟡 No Limite' : '🟢 OK';
+                let status;
+                if (val > metaValor) {
+                    status = chalk.red('🔴 Excedido');
+                } else if (val >= metaValor * 0.8) {
+                    status = chalk.yellow('🟡 No Limite');
+                } else {
+                    status = chalk.green('🟢 OK');
+                }
                 console.log(`  - ${cat}: R$ ${val.toFixed(2)} / Meta: R$ ${metaValor.toFixed(2)} (${status})`);
             });
         }
         console.log('');
     } catch (error) {
-        console.error("Erro ao gerar resumo financeiro:", error);
+        console.error(chalk.red("Erro ao gerar resumo financeiro:"), error);
     }
 }
 
 // ===================== Funções de menu principal =====================
+
+/**
+ * @description Executa a função correspondente à opção selecionada no menu principal.
+ * @param {string} opcao - A opção selecionada pelo usuário.
+ * @returns {Promise<void>}
+ */
 async function executarMenu(opcao) {
     switch (opcao) {
         case 'Adicionar Transação': await salvarGastos(); break;
@@ -382,15 +457,21 @@ async function executarMenu(opcao) {
         case 'Ver Gastos': await verGastos(); break;
         case 'Gastos Fixos': await gerenciarGastosFixos(); break;
         case 'Resumo Financeiro': await gerarResumoFinanceiro(); break;
-        case 'Sair': console.log("Saindo do sistema."); process.exit(0); break;
-        default: console.log("Opção inválida"); break;
+        case 'Sair': console.log(chalk.blue("Saindo do sistema.")); process.exit(0); break;
+        default: console.log(chalk.red("Opção inválida")); break;
     }
     await new Promise(resolve => setTimeout(resolve, 500)); // Pausa entre ações
 }
 
 // ===================== Função principal =====================
+
+/**
+ * @description Função principal que inicia o sistema de controle financeiro.
+ *              Exibe o menu principal em loop até que o usuário escolha sair.
+ * @returns {Promise<void>}
+ */
 async function iniciar() {
-    console.log("Bem-vindo ao sistema de controle financeiro pessoal!");
+    console.log(boxen(chalk.cyan.bold("Bem-vindo ao sistema de controle financeiro pessoal!"), {padding: 1, margin: 1, borderStyle: 'double'}));
     await inicializarGastosFixos();
 
     let sair = false;
