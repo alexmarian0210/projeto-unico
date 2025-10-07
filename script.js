@@ -354,12 +354,12 @@ async function verGastosFixos() {
  */
 async function gerenciarGastosFixos() {
     const opcao = await select({
-        message: 'Gerenciar Gastos Fixos:',
+        message: chalk.yellow('Gerenciar Gastos Fixos:'),
         choices: [
-            {value: 'Adicionar Gasto Fixo', name: 'Adicionar Gasto Fixo'},
-            {value: 'Ver Gastos Fixos', name: 'Ver Gastos Fixos'},
-            {value: 'Marcar como Pago', name: 'Marcar como Pago'},
-            {value: 'Voltar', name: 'Voltar ao Menu Principal'}
+            {value: 'Adicionar Gasto Fixo', name: chalk.green('Adicionar Gasto Fixo')},
+            {value: 'Ver Gastos Fixos', name: chalk.blue('Ver Gastos Fixos')},
+            {value: 'Marcar como Pago', name: chalk.cyan('Marcar como Pago')},
+            {value: 'Voltar', name: chalk.red('Voltar ao Menu Principal')}
         ]
     });
 
@@ -477,15 +477,15 @@ async function iniciar() {
     let sair = false;
     while (!sair) {
         const opcao = await select({
-            message: 'Escolha uma opção:',
+            message: chalk.yellow('Escolha uma opção:'),
             choices: [
-                {value: 'Adicionar Transação', name: '1. Adicionar Transação'},
-                {value: 'Ver Transações', name: '2. Ver Transações'},
-                {value: 'Definir Gastos', name: '3. Definir Gastos/Metas'},
-                {value: 'Ver Gastos', name: '4. Ver Gastos'},
-                {value: 'Gastos Fixos', name: '5. Gerenciar Gastos Fixos'},
-                {value: 'Resumo Financeiro', name: '6. Resumo Financeiro'},
-                {value: 'Sair', name: '7. Sair'}
+                {value: 'Adicionar Transação', name: chalk.green('1. Adicionar Transação')},
+                {value: 'Ver Transações', name: chalk.blue('2. Ver Transações')},
+                {value: 'Definir Gastos', name: chalk.magenta('3. Definir Gastos/Metas')},
+                {value: 'Ver Gastos', name: chalk.cyan('4. Ver Gastos')},
+                {value: 'Gastos Fixos', name: chalk.yellow('5. Gerenciar Gastos Fixos')},
+                {value: 'Resumo Financeiro', name: chalk.white('6. Resumo Financeiro')},
+                {value: 'Sair', name: chalk.red('7. Sair')}
             ]
         });
 
