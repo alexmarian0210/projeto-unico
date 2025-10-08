@@ -1,5 +1,8 @@
 # FinControl CLI
 
+# Canva
+link https://www.canva.com/design/DAG1JkYIHTs/p4BLKHzpNzCfJfA3K4aMUw/edit?utm_content=DAG1JkYIHTs&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton 
+
 ## Descrição
 O FinControl CLI é um sistema de controle financeiro pessoal em linha de comando (CLI), desenvolvido em Node.js. Ele permite registrar transações diárias (receitas e despesas), gerenciar gastos fixos mensais, definir metas por categoria de gastos e gerar resumos financeiros com comparações automáticas entre gastos reais e metas, ajudando a organizar as finanças de forma simples e offline.
 

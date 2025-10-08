@@ -353,23 +353,36 @@ async function verGastosFixos() {
  * @returns {Promise<void>}
  */
 async function gerenciarGastosFixos() {
-    const opcao = await select({
-        message: chalk.yellow('Gerenciar Gastos Fixos:'),
-        choices: [
-            {value: 'Adicionar Gasto Fixo', name: chalk.green('Adicionar Gasto Fixo')},
-            {value: 'Ver Gastos Fixos', name: chalk.blue('Ver Gastos Fixos')},
-            {value: 'Marcar como Pago', name: chalk.cyan('Marcar como Pago')},
-            {value: 'Voltar', name: chalk.red('Voltar ao Menu Principal')}
-        ]
-    });
+    let sair = false;
+    while (!sair) {
+        const opcao = await select({
+            message: chalk.yellow('Gerenciar Gastos Fixos:'),
+            choices: [
+                {value: 'Adicionar Gasto Fixo', name: chalk.green('Adicionar Gasto Fixo')},
+                {value: 'Ver Gastos Fixos', name: chalk.blue('Ver Gastos Fixos')},
+                {value: 'Marcar como Pago', name: chalk.cyan('Marcar como Pago')},
+                {value: 'Voltar', name: chalk.red('Voltar ao Menu Principal')}
+            ]
+        });
 
-    switch (opcao) {
-        case 'Adicionar Gasto Fixo': await adicionarGastoFixo(); break;
-        case 'Ver Gastos Fixos': await verGastosFixos(); break;
-        case 'Marcar como Pago': await marcarGastoComoPago(); break;
-        case 'Voltar': break;
+        switch (opcao) {
+            case 'Adicionar Gasto Fixo':
+                await adicionarGastoFixo();
+                break;
+            case 'Ver Gastos Fixos':
+                await verGastosFixos();
+                break;
+            case 'Marcar como Pago':
+                await marcarGastoComoPago();
+                break;
+            case 'Voltar':
+                sair = true;
+                break;
+        }
+        if (!sair) {
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa para UX
+        }
     }
-    await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa para UX
 }
 
 // ===================== Função de Resumo Financeiro (com comparação de metas) =====================
