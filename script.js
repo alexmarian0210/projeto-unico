@@ -115,6 +115,71 @@ async function verTransacoes() {
     }
 }
 
+/**
+ * @description Deleta uma transação específica do arquivo `transacoes.json`.
+ *              Mostra uma lista de transações para o usuário escolher qual deletar.
+ *              Pede confirmação antes de remover a transação permanentemente.
+ * @returns {Promise<void>}
+ */
+async function deletarTransacao() {
+    try {
+        let transacoes = [];
+        try {
+            const conteudo = await fs.readFile('transacoes.json', 'utf8');
+            transacoes = JSON.parse(conteudo);
+        } catch {
+            console.log(chalk.yellow('Nenhuma transação encontrada para deletar.'));
+            return;
+        }
+
+        if (!transacoes.length) {
+            console.log(chalk.yellow('Nenhuma transação registrada para deletar.'));
+            return;
+        }
+
+        const escolhas = transacoes.map((t, i) => ({
+            name: `${i + 1}. ${t.descricao} - R$ ${t.valor.toFixed(2)} (${t.data})`,
+            value: i
+        }));
+
+        const indiceParaDeletar = await select({
+            message: 'Qual transação você deseja deletar?',
+            choices: [...escolhas, { name: 'Cancelar', value: -1 }]
+        });
+
+        if (indiceParaDeletar === -1) {
+            console.log(chalk.gray('Operação de exclusão cancelada.'));
+            return;
+        }
+
+        const transacaoSelecionada = transacoes[indiceParaDeletar];
+        console.log(chalk.yellow(`Você selecionou para deletar:`));
+        console.log(chalk.yellow(`  - Descrição: ${transacaoSelecionada.descricao}`));
+        console.log(chalk.yellow(`  - Valor: R$ ${transacaoSelecionada.valor.toFixed(2)}`));
+        console.log(chalk.yellow(`  - Data: ${transacaoSelecionada.data}`));
+
+
+        const confirmacao = await select({
+            message: 'Você tem certeza que deseja deletar esta transação? Esta ação não pode ser desfeita.',
+            choices: [
+                { value: 'sim', name: 'Sim, deletar' },
+                { value: 'nao', name: 'Não, cancelar' }
+            ]
+        });
+
+        if (confirmacao === 'sim') {
+            transacoes.splice(indiceParaDeletar, 1);
+            await fs.writeFile('transacoes.json', JSON.stringify(transacoes, null, 2));
+            console.log(chalk.green('Transação deletada com sucesso!'));
+        } else {
+            console.log(chalk.gray('Operação de exclusão cancelada.'));
+        }
+
+    } catch (error) {
+        console.error(chalk.red('Erro ao deletar transação:'), error);
+    }
+}
+
 // ===================== Funções de gastos =====================
 
 /**
@@ -346,6 +411,58 @@ async function verGastosFixos() {
     }
 }
 
+/**
+ * @description Deleta um gasto fixo do arquivo `gastosFixos.json`.
+ *              Mostra uma lista de gastos fixos para o usuário escolher qual deletar.
+ *              Pede confirmação antes de remover o item permanentemente.
+ * @returns {Promise<void>}
+ */
+async function deletarGastoFixo() {
+    try {
+        let gastosFixos = await inicializarGastosFixos();
+        if (!gastosFixos.length) {
+            console.log(chalk.yellow("Nenhum gasto fixo encontrado para deletar."));
+            return;
+        }
+
+        const escolhas = gastosFixos.map((g, i) => ({
+            name: `${i + 1}. ${g.descricao} - R$ ${g.valor.toFixed(2)}`,
+            value: i
+        }));
+
+        const indiceParaDeletar = await select({
+            message: 'Qual gasto fixo você deseja deletar?',
+            choices: [...escolhas, { name: 'Cancelar', value: -1 }]
+        });
+
+        if (indiceParaDeletar === -1) {
+            console.log(chalk.gray('Operação de exclusão cancelada.'));
+            return;
+        }
+
+        const gastoSelecionado = gastosFixos[indiceParaDeletar];
+        console.log(chalk.yellow(`Você selecionou para deletar: ${gastoSelecionado.descricao}`));
+
+        const confirmacao = await select({
+            message: 'Você tem certeza que deseja deletar este gasto fixo? Esta ação não pode ser desfeita.',
+            choices: [
+                { value: 'sim', name: 'Sim, deletar' },
+                { value: 'nao', name: 'Não, cancelar' }
+            ]
+        });
+
+        if (confirmacao === 'sim') {
+            gastosFixos.splice(indiceParaDeletar, 1);
+            await fs.writeFile('gastosFixos.json', JSON.stringify(gastosFixos, null, 2));
+            console.log(chalk.green('Gasto fixo deletado com sucesso!'));
+        } else {
+            console.log(chalk.gray('Operação de exclusão cancelada.'));
+        }
+    } catch (error) {
+        console.error(chalk.red('Erro ao deletar gasto fixo:'), error);
+    }
+}
+
 // ===================== Menu de Gastos Fixos =====================
 
 /**
@@ -361,6 +478,7 @@ async function gerenciarGastosFixos() {
                 {value: 'Adicionar Gasto Fixo', name: chalk.green('Adicionar Gasto Fixo')},
                 {value: 'Ver Gastos Fixos', name: chalk.blue('Ver Gastos Fixos')},
                 {value: 'Marcar como Pago', name: chalk.cyan('Marcar como Pago')},
+                {value: 'Deletar Gasto Fixo', name: chalk.red('Deletar Gasto Fixo')},
                 {value: 'Voltar', name: chalk.red('Voltar ao Menu Principal')}
             ]
         });
@@ -374,6 +492,9 @@ async function gerenciarGastosFixos() {
                 break;
             case 'Marcar como Pago':
                 await marcarGastoComoPago();
+                break;
+            case 'Deletar Gasto Fixo':
+                await deletarGastoFixo();
                 break;
             case 'Voltar':
                 sair = true;
@@ -466,6 +587,7 @@ async function executarMenu(opcao) {
     switch (opcao) {
         case 'Adicionar Transação': await salvarGastos(); break;
         case 'Ver Transações': await verTransacoes(); break;
+        case 'Deletar Transação': await deletarTransacao(); break;
         case 'Definir Gastos': await definirGastos(); break;
         case 'Ver Gastos': await verGastos(); break;
         case 'Gastos Fixos': await gerenciarGastosFixos(); break;
@@ -489,16 +611,18 @@ async function iniciar() {
 
     let sair = false;
     while (!sair) {
+        console.clear(); // Limpa a tela a cada iteração do menu
         const opcao = await select({
             message: chalk.yellow('Escolha uma opção:'),
             choices: [
                 {value: 'Adicionar Transação', name: chalk.green('1. Adicionar Transação')},
                 {value: 'Ver Transações', name: chalk.blue('2. Ver Transações')},
-                {value: 'Definir Gastos', name: chalk.magenta('3. Definir Gastos/Metas')},
-                {value: 'Ver Gastos', name: chalk.cyan('4. Ver Gastos')},
-                {value: 'Gastos Fixos', name: chalk.yellow('5. Gerenciar Gastos Fixos')},
-                {value: 'Resumo Financeiro', name: chalk.white('6. Resumo Financeiro')},
-                {value: 'Sair', name: chalk.red('7. Sair')}
+                {value: 'Deletar Transação', name: chalk.red('3. Deletar Transação')},
+                {value: 'Definir Gastos', name: chalk.magenta('4. Definir Gastos/Metas')},
+                {value: 'Ver Gastos', name: chalk.cyan('5. Ver Gastos')},
+                {value: 'Gastos Fixos', name: chalk.yellow('6. Gerenciar Gastos Fixos')},
+                {value: 'Resumo Financeiro', name: chalk.white('7. Resumo Financeiro')},
+                {value: 'Sair', name: chalk.red('8. Sair')}
             ]
         });
 
