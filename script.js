@@ -4,6 +4,15 @@ const fs = require('fs').promises; // Usando promises para async/await
 const chalk = require('chalk');
 const boxen = require('boxen');
 
+// ===================== Funções Auxiliares =====================
+/**
+ * @description Exibe um título formatado no console.
+ * @param {string} titulo O texto do título.
+ */
+function exibirTitulo(titulo) {
+    console.log(boxen(chalk.cyan.bold(titulo), {padding: 1, margin: 1, borderStyle: 'double'}));
+}
+
 // ===================== Funções de transações =====================
 
 /**
@@ -14,6 +23,8 @@ const boxen = require('boxen');
  * @returns {Promise<void>}
  */
 async function salvarGastos() {
+    console.clear();
+    exibirTitulo("Adicionar Nova Transação");
     try {
         const data = new Date().toISOString().split('T')[0];
 
@@ -86,6 +97,8 @@ async function salvarGastos() {
  * @returns {Promise<void>}
  */
 async function verTransacoes() {
+    console.clear();
+    exibirTitulo("Visualizar Transações");
     try {
         let transacoes = [];
         try {
@@ -122,6 +135,8 @@ async function verTransacoes() {
  * @returns {Promise<void>}
  */
 async function deletarTransacao() {
+    console.clear();
+    exibirTitulo("Deletar Transação");
     try {
         let transacoes = [];
         try {
@@ -189,6 +204,8 @@ async function deletarTransacao() {
  * @returns {Promise<void>}
  */
 async function definirGastos() {
+    console.clear();
+    exibirTitulo("Definir Metas de Gastos");
     try {
         // Seleciona a categoria primeiro
         const categoria = await select({ 
@@ -232,6 +249,8 @@ async function definirGastos() {
  * @returns {Promise<void>}
  */
 async function verGastos() {
+    console.clear();
+    exibirTitulo("Visualizar Gastos do Mês");
     try {
         let transacoes = [];
         try {
@@ -472,8 +491,10 @@ async function deletarGastoFixo() {
 async function gerenciarGastosFixos() {
     let sair = false;
     while (!sair) {
+        console.clear();
+        exibirTitulo("Gerenciar Gastos Fixos");
         const opcao = await select({
-            message: chalk.yellow('Gerenciar Gastos Fixos:'),
+            message: chalk.yellow('Escolha uma opção:'),
             choices: [
                 {value: 'Adicionar Gasto Fixo', name: chalk.green('Adicionar Gasto Fixo')},
                 {value: 'Ver Gastos Fixos', name: chalk.blue('Ver Gastos Fixos')},
@@ -486,22 +507,23 @@ async function gerenciarGastosFixos() {
         switch (opcao) {
             case 'Adicionar Gasto Fixo':
                 await adicionarGastoFixo();
+                await pressioneEnterParaContinuar();
                 break;
             case 'Ver Gastos Fixos':
                 await verGastosFixos();
+                await pressioneEnterParaContinuar();
                 break;
             case 'Marcar como Pago':
                 await marcarGastoComoPago();
+                await pressioneEnterParaContinuar();
                 break;
             case 'Deletar Gasto Fixo':
                 await deletarGastoFixo();
+                await pressioneEnterParaContinuar();
                 break;
             case 'Voltar':
                 sair = true;
                 break;
-        }
-        if (!sair) {
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Pausa para UX
         }
     }
 }
@@ -515,6 +537,8 @@ async function gerenciarGastosFixos() {
  * @returns {Promise<void>}
  */
 async function gerarResumoFinanceiro() {
+    console.clear();
+    exibirTitulo("Resumo Financeiro");
     try {
         let transacoes = [];
         try {
@@ -579,23 +603,53 @@ async function gerarResumoFinanceiro() {
 // ===================== Funções de menu principal =====================
 
 /**
+ * @description Pausa a execução e espera que o usuário pressione Enter para continuar.
+ * @returns {Promise<void>}
+ */
+async function pressioneEnterParaContinuar() {
+    await input({ message: '\nPressione Enter para voltar ao menu...' });
+}
+
+/**
  * @description Executa a função correspondente à opção selecionada no menu principal.
  * @param {string} opcao - A opção selecionada pelo usuário.
  * @returns {Promise<void>}
  */
 async function executarMenu(opcao) {
     switch (opcao) {
-        case 'Adicionar Transação': await salvarGastos(); break;
-        case 'Ver Transações': await verTransacoes(); break;
-        case 'Definir Gastos': await definirGastos(); break;
-        case 'Ver Gastos': await verGastos(); break;
-        case 'Gastos Fixos': await gerenciarGastosFixos(); break;
-        case 'Resumo Financeiro': await gerarResumoFinanceiro(); break;
-        case 'Deletar Transação': await deletarTransacao(); break;
+        case 'Adicionar Transação': 
+            await salvarGastos(); 
+            await pressioneEnterParaContinuar();
+            break;
+        case 'Ver Transações': 
+            await verTransacoes(); 
+            await pressioneEnterParaContinuar();
+            break;
+        case 'Deletar Transação': 
+            await deletarTransacao(); 
+            await pressioneEnterParaContinuar();
+            break;
+        case 'Definir Gastos': 
+            await definirGastos(); 
+            await pressioneEnterParaContinuar();
+            break;
+        case 'Ver Gastos': 
+            await verGastos(); 
+            await pressioneEnterParaContinuar();
+            break;
+        case 'Gastos Fixos': 
+            await gerenciarGastosFixos(); 
+            break;
+        case 'Resumo Financeiro': 
+            await gerarResumoFinanceiro(); 
+            await pressioneEnterParaContinuar();
+            break;
         case 'Sair': console.log(chalk.blue("Saindo do sistema.")); process.exit(0); break;
-        default: console.log(chalk.red("Opção inválida")); break;
+        default: 
+            console.log(chalk.red("Opção inválida")); 
+            await pressioneEnterParaContinuar();
+            break;
     }
-    await new Promise(resolve => setTimeout(resolve, 500)); // Pausa entre ações
 }
 
 // ===================== Função principal =====================
@@ -612,6 +666,7 @@ async function iniciar() {
     let sair = false;
     while (!sair) {
         console.clear(); // Limpa a tela a cada iteração do menu
+        exibirTitulo("Menu Principal");
         const opcao = await select({
             message: chalk.yellow('Escolha uma opção:'),
             choices: [
@@ -621,7 +676,7 @@ async function iniciar() {
                 {value: 'Ver Gastos', name: chalk.cyan('4. Ver Gastos')},
                 {value: 'Gastos Fixos', name: chalk.yellow('5. Gerenciar Gastos Fixos')},
                 {value: 'Resumo Financeiro', name: chalk.white('6. Resumo Financeiro')},
-                 {value: 'Deletar Transação', name: chalk.red('7. Deletar Transação')},
+                {value: 'Deletar Transação', name: chalk.red('7. Deletar Transação')},
                 {value: 'Sair', name: chalk.red('8. Sair')}
             ]
         });

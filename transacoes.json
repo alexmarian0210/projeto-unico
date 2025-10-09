@@ -1,0 +1,11 @@
+[
+  {
+    "tipo": "receita",
+    "valor": 65,
+    "categoria": "outros",
+    "descricao": "",
+    "data": "2025-10-09",
+    "formaPagamento": "dinheiro",
+    "recorrente": false
+  }
+]
