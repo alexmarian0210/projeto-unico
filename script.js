@@ -587,11 +587,11 @@ async function executarMenu(opcao) {
     switch (opcao) {
         case 'Adicionar Transação': await salvarGastos(); break;
         case 'Ver Transações': await verTransacoes(); break;
-        case 'Deletar Transação': await deletarTransacao(); break;
         case 'Definir Gastos': await definirGastos(); break;
         case 'Ver Gastos': await verGastos(); break;
         case 'Gastos Fixos': await gerenciarGastosFixos(); break;
         case 'Resumo Financeiro': await gerarResumoFinanceiro(); break;
+        case 'Deletar Transação': await deletarTransacao(); break;
         case 'Sair': console.log(chalk.blue("Saindo do sistema.")); process.exit(0); break;
         default: console.log(chalk.red("Opção inválida")); break;
     }
@@ -617,11 +617,11 @@ async function iniciar() {
             choices: [
                 {value: 'Adicionar Transação', name: chalk.green('1. Adicionar Transação')},
                 {value: 'Ver Transações', name: chalk.blue('2. Ver Transações')},
-                {value: 'Deletar Transação', name: chalk.red('3. Deletar Transação')},
-                {value: 'Definir Gastos', name: chalk.magenta('4. Definir Gastos/Metas')},
-                {value: 'Ver Gastos', name: chalk.cyan('5. Ver Gastos')},
-                {value: 'Gastos Fixos', name: chalk.yellow('6. Gerenciar Gastos Fixos')},
-                {value: 'Resumo Financeiro', name: chalk.white('7. Resumo Financeiro')},
+                {value: 'Definir Gastos', name: chalk.magenta('3. Definir Gastos/Metas')},
+                {value: 'Ver Gastos', name: chalk.cyan('4. Ver Gastos')},
+                {value: 'Gastos Fixos', name: chalk.yellow('5. Gerenciar Gastos Fixos')},
+                {value: 'Resumo Financeiro', name: chalk.white('6. Resumo Financeiro')},
+                 {value: 'Deletar Transação', name: chalk.red('7. Deletar Transação')},
                 {value: 'Sair', name: chalk.red('8. Sair')}
             ]
         });
